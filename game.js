@@ -23,7 +23,7 @@ function startGame() {
 }
 
 function displayBoard() {
-  console.clear(); // <---
+  console.clear();
   console.log(chalk.yellow('=== tic tac toe <3 ===\n'));
 
   console.log(chalk.gray('  A   B   C'));
@@ -69,23 +69,10 @@ function playerMove() {
   // ask for position
   const input = readlineSync.question(`player ${currentPlayer}, enter position (e.g. A1, B2, C3): `).toUpperCase();
 
-  // input format
-  function isValidPos(input) {
-    const validRows = ['A', 'B', 'C'];
-    const validCols = ['1', '2', '3'];
-
-    if (input.length !== 2) return false;
-    if (!validRows.includes(input[0])) return false;
-    if (!validCols.includes(input[1])) return false;
-
-    return true;
-  }
-
   if (!isValidPos(input)) {
     console.log("DUmmY that's WrOnG! WhAt did I tell you? OnLY use format like 'A1', 'B2', etc.");
-    return playerMove();
+    return playerMove(); // <--- eliminate recursion?
   }
-
 
   // convert chess notation to array
   const colIndex = input.charCodeAt(0) - 'A'.charCodeAt(0);
@@ -99,8 +86,6 @@ function playerMove() {
 
   // update board
   board[rowIndex][colIndex] = currentPlayer;
-
-  checkWinning();
 
   if (checkWinning()) {
     displayBoard(); // show board one last time
@@ -117,6 +102,18 @@ function playerMove() {
   if (gameActive) {
     playerMove(); // loop
   }
+}
+
+// input format
+function isValidPos(input) {
+  const validRows = ['A', 'B', 'C'];
+  const validCols = ['1', '2', '3'];
+
+  if (input.length !== 2) return false;
+  if (!validRows.includes(input[0])) return false;
+  if (!validCols.includes(input[1])) return false;
+
+  return true;
 }
 
 function switchPlayer() {
@@ -156,7 +153,7 @@ function checkWinning() {
 
 function gameEnd() {
   // ask for restart
-  const input = readlineSync.question(`Would you like to TrY aGain? say Y or N `).toUpperCase();
+  const input = readlineSync.question(`Would you like to TrY aGain? say Y or N: `).toUpperCase();
 
   if (input == 'Y') {
     console.log('Mmmk, here we go aGaiN...')
