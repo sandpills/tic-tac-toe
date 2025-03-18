@@ -66,26 +66,8 @@ function displayBoard() {
 }
 
 function playerMove() {
-  // ask for position
-  const input = readlineSync.question(`player ${currentPlayer}, enter position (e.g. A1, B2, C3): `).toUpperCase();
-
-  if (!isValidPos(input)) {
-    console.log("DUmmY that's WrOnG! WhAt did I tell you? OnLY use format like 'A1', 'B2', etc.");
-    return playerMove(); // <--- eliminate recursion?
-  }
-
-  // convert chess notation to array
-  const colIndex = input.charCodeAt(0) - 'A'.charCodeAt(0);
-  const rowIndex = parseInt(input[1]) - 1;
-
-  // check if spot is occupied
-  if (board[rowIndex][colIndex] !== ' ') {
-    console.log("DUmmY this sPot iz tAkEn! Try agAiN anD be bEttEr >:0");
-    return playerMove(); // try again same player
-  }
-
-  // update board
-  board[rowIndex][colIndex] = currentPlayer;
+  displayBoard();
+  userInput();
 
   if (checkWinning()) {
     displayBoard(); // show board one last time
@@ -96,12 +78,38 @@ function playerMove() {
   }
 
   // if no win, change player
-  switchPlayer();
-  displayBoard();
+  // switchPlayer();
+  // displayBoard();
 
-  if (gameActive) {
-    playerMove(); // loop
+  // if (gameActive) {
+  //   playerMove(); // loop
+  // }
+
+  switchPlayer();
+}
+
+function userInput() {
+  // ask for position
+  let input = readlineSync.question(`player ${currentPlayer}, enter position (e.g. A1, B2, C3): `).toUpperCase();
+
+  // check input format
+  if (!isValidPos(input)) {
+    console.log("DUmmY that's WrOnG! WhAt did I tell you? OnLY use format like 'A1', 'B2', etc.");
+    return userInput();
   }
+
+  // convert chess notation to array
+  const colIndex = input.charCodeAt(0) - 'A'.charCodeAt(0);
+  const rowIndex = parseInt(input[1]) - 1;
+
+  // check if spot is occupied
+  if (board[rowIndex][colIndex] !== ' ') {
+    console.log("DUmmY this sPot iz tAkEn! Try agAiN anD be bEttEr >:0");
+    return userInput(); // try again
+  }
+
+  // update board
+  board[rowIndex][colIndex] = currentPlayer;
 }
 
 // input format
@@ -116,11 +124,58 @@ function isValidPos(input) {
   return true;
 }
 
+function computerMove() {
+  displayBoard();
+
+  let emptySpots = [];
+  for (let i = 0; i < 3; i++) {
+    for (let j = 0; j < 3; j++) {
+      if (board[i][j] == ' ') {
+        emptySpots.push({ i, j });
+      }
+    }
+  }
+
+  // console.log(emptySpots[randomIndex]);
+
+  let randomIndex = Math.floor(Math.random() * emptySpots.length);
+
+  let computerX = emptySpots[randomIndex].i;
+  let computerY = emptySpots[randomIndex].j;
+
+
+  if (emptySpots.length != 0) {
+    board[computerX][computerY] = 'O';
+  } else {
+    console.log('the board is too small for you huh? you both suck');
+    gameEnd();
+    return;
+  }
+
+  if (checkWinning()) {
+    displayBoard(); // show board one last time
+    console.log(currentPlayer + ' has won, try again i guess');
+    gameActive = false;
+    gameEnd();
+    return; // exit
+  }
+
+  // delay 1 sec
+  setTimeout(() => {
+    switchPlayer();
+  }, 1000);
+
+  // displayBoard();
+
+}
+
 function switchPlayer() {
   if (currentPlayer == 'X') {
     currentPlayer = 'O'
+    computerMove();
   } else {
     currentPlayer = 'X'
+    playerMove();
   }
 }
 
@@ -164,6 +219,7 @@ function gameEnd() {
       [' ', ' ', ' ']
     ];
     gameActive = true;
+    currentPlayer = 'X';
     startGame();
   } else {
     console.log('ok, nEveR come bAck!');
